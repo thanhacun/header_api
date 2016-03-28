@@ -2,6 +2,7 @@
 
 var path = process.cwd();
 var ClickHandler = require(path + '/app/controllers/clickHandler.server.js');
+//var ip = require('ip');
 
 module.exports = function (app, passport) {
 
@@ -16,8 +17,13 @@ module.exports = function (app, passport) {
 	var clickHandler = new ClickHandler();
 
 	app.route('/')
-		.get(isLoggedIn, function (req, res) {
-			res.sendFile(path + '/public/index.html');
+		.get(function(req, res) {
+			var headers = req.headers;
+			var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
+			var language = headers['accept-language'].split(",")[0];
+			var software = headers['user-agent'];
+			software = software.slice(software.search('\\(') + 1, software.search('\\)'));
+			res.send({'ipaddress': ip, 'language': language, 'software': software});
 		});
 
 	app.route('/login')
